@@ -1,28 +1,19 @@
-// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
 model Round {
-  id             String   @id @default(cuid())
-  createdAt      DateTime @default(now())
-  status         String   // CREATED | STARTED | REVEALED
-  nonce          String
-  commitHex      String
-  serverSeed     String?
-  clientSeed     String
-  combinedSeed   String
-  pegMapHash     String
-  rows           Int
-  dropColumn     Int
-  binIndex       Int
-  payoutMultiplier Float
-  betCents       Int
-  pathJson       Json
-  revealedAt     DateTime?
+  id         Int      @id @default(autoincrement())
+  serverSeed String
+  clientSeed String
+  nonce      Int
+  pathJson   String
+  result     Int
+  
+  createdAt  DateTime @default(now())
 }
