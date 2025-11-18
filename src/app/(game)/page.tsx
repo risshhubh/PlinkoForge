@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { PlinkoBoard } from "./components/Board";
 import { UIControls } from "./components/UIControls";
-import { SoundManager } from "./components/SoundManager";
+import { useSoundManager } from "./components/SoundManager";
 
 export default function GamePage() {
   const rows = 12;
