@@ -1,0 +1,9 @@
+import confetti from "canvas-confetti";
+
+const celebrate = () => {
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 },
+  });
+};
