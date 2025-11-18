@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { PlinkoBoard } from "./components/Board";
 import { UIControls } from "./components/UIControls";
-import { useSoundManager } from "./components/SoundManager";
+import { useSoundManager, SoundToggle } from "./components/SoundManager";
 
 export default function GamePage() {
   const rows = 12;
@@ -16,9 +16,11 @@ export default function GamePage() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [roundsPlayed, setRoundsPlayed] = useState(0);
 
+  // Use SoundManager hook
+  const { muted, setMuted, playPeg, playWin } = useSoundManager();
+
   const handleStart = async () => {
     try {
-      // Reset golden state for new round
       setGolden(false);
 
       const commitRes = await fetch("/api/rounds/commit", { method: "POST" });
@@ -46,6 +48,9 @@ export default function GamePage() {
       setPath(data.path ?? []);
       setBinIndex(data.binIndex ?? 0);
       setRoundsPlayed(prev => prev + 1);
+
+      // Play peg sound for each step
+      data.path?.forEach(() => playPeg());
     } catch (err) {
       console.error("Error starting round:", err);
     }
@@ -64,30 +69,27 @@ export default function GamePage() {
 
   const handleComplete = (finalBin: number) => {
     console.log("Ball landed in bin:", finalBin);
-    // Trigger golden ball and confetti if landed in center bin (index 6) after 2-3 rounds
+    // Trigger golden ball and confetti if landed in center bin after 2-3 rounds
     if (finalBin === 6 && roundsPlayed >= 2) {
       setGolden(true);
-      SoundManager.playCheer();
+      playWin(); // Correct function from useSoundManager
     }
   };
 
   return (
     <div
-      className="min-h-screen w-full flex items-center justify-center p-6"
-      style={{
-        background: "linear-gradient(135deg, #0f0c29, #302b63, #24243e)",
-      }}
+      className="min-h-screen w-full flex flex-col items-center justify-center p-6"
+      style={{ background: "linear-gradient(135deg, #0f0c29, #302b63, #24243e)" }}
     >
-      <div
-        className="w-full max-w-3xl rounded-3xl shadow-2xl p-8 backdrop-blur-lg"
-        style={{
-          background: "rgba(255, 255, 255, 0.1)",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
-        }}
-      >
+      <div className="w-full max-w-3xl rounded-3xl shadow-2xl p-8 backdrop-blur-lg" style={{ background: "rgba(255, 255, 255, 0.1)", border: "1px solid rgba(255, 255, 255, 0.2)" }}>
         <h1 className="text-center text-3xl font-bold mb-6 text-white drop-shadow">
           🎯 Plinko Forge
         </h1>
+
+        {/* Sound toggle */}
+        <div className="flex justify-end mb-4">
+          <SoundToggle muted={muted} setMuted={setMuted} />
+        </div>
 
         <div className="flex justify-center mb-6">
           <UIControls
@@ -102,13 +104,7 @@ export default function GamePage() {
 
         <div className="flex justify-center">
           {path.length > 0 ? (
-            <div
-              className="rounded-2xl p-6 shadow-xl"
-              style={{
-                background: "rgba(255,255,255,0.15)",
-                border: "1px solid rgba(255,255,255,0.25)",
-              }}
-            >
+            <div className="rounded-2xl p-6 shadow-xl" style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)" }}>
               <PlinkoBoard
                 rows={rows}
                 path={path}
